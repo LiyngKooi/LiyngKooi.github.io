@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research — Li Yng Kooi</title>
+
+  <!-- Must stay identical to index.html, or the tab icon flickers or drops
+       when you move between the two pages. -->
+  <link rel="icon" type="image/png" sizes="32x32" href="tab-icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="tab-icon-16.png">
+  <link rel="icon" type="image/svg+xml" href="tab-icon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="tab-icon-180.png">
+
+  <!-- Same blocking theme resolver as index.html, and the SAME localStorage
+       key, so the ivory/dark choice carries across both pages without a flash. -->
+  <script>
+  (function () {
+    var d = document.documentElement;
+    d.classList.add('anim-ready');
+    var t = null;
+    try { t = localStorage.getItem('site-theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            ? 'dark' : 'light';
+    }
+    d.setAttribute('data-theme', t);
+  })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN — pinned so it can't drift under you -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            /* Garamond DISPLAY cut — hero titles only; see index.html. */
+            display: ['"Cormorant Garamond"', '"EB Garamond"', 'Baskerville', 'Georgia', 'serif'],
+            serif: ['"EB Garamond"', 'Baskerville', 'Georgia', 'serif'],
+            sans:  ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ============================================================
+       0. FONT STACKS — identical to index.html
+       ============================================================ */
+    :root {
+      --display: 'Cormorant Garamond', 'EB Garamond', 'Baskerville', 'Georgia', serif;
+      --serif: 'EB Garamond', 'Baskerville', 'Georgia', serif;
+      --sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      /* Monospace is a system stack, not a webfont: it renders as SF Mono on
+         macOS, Consolas on Windows, so the labels differ slightly by machine.
+         Used only for small technical labels on this page. */
+      --mono:  ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    }
+
+    /* ============================================================
+       1. THEME TOKENS — identical to index.html
+       ============================================================ */
+    :root,
+    :root[data-theme="light"] {
+      --bg:     #FAFAF8;
+      --panel:  #EDEBE6;
+      --fg:     #1C1917;
+      --body:   #44403C;
+      --muted:  #78716C;
+      --line:   #E7E5E4;
+      --hair:   #D6D3D1;
+      --rule:   #1C1917;          /* hero hairline */
+      --accent: #E8578F;   /* the confetti pink, deepened for a 1px rule on ivory */
+      --track:  #E7E5E4;
+      --header: rgba(250, 250, 248, 0.9);
+      --logo-filter: none;
+      --photo-shadow: 0 28px 56px -16px rgba(28, 25, 23, 0.32);
+      --ring-edge: rgba(28, 25, 23, 0.1);
+
+      --nav-hover:  #000000;
+      --cur-border: rgba(28, 25, 23, 0.35);
+      --cur-spot:   rgba(0, 0, 0, 0.08);
+
+      color-scheme: light;
+    }
+
+    :root[data-theme="dark"] {
+      --bg:     #121212;
+      --panel:  #202020;
+      --fg:     #FAFAF8;
+      --body:   #C2BDB7;
+      --muted:  #A8A29E;
+      --line:   #262626;
+      --hair:   #3A3A3A;
+      --rule:   rgba(255, 255, 255, 0.8);
+      --accent: #FA7AA9;   /* the confetti pink as-is; it needs no help on black */
+      --track:  rgba(250, 250, 248, 0.14);
+      --header: rgba(18, 18, 18, 0.82);
+      --logo-filter: invert(1) brightness(1.08);
+      --photo-shadow: 0 28px 56px -16px rgba(0, 0, 0, 0.8);
+      --ring-edge: rgba(255, 255, 255, 0.1);
+
+      --nav-hover:  #FFFFFF;
+      --cur-border: rgba(255, 255, 255, 0.35);
+      --cur-spot:   rgba(255, 255, 255, 0.2);
+
+      color-scheme: dark;
+    }
+
+    :root.theming * {
+      transition: background-color 0.45s ease,
+                  color 0.45s ease,
+                  border-color 0.45s ease,
+                  fill 0.45s ease,
+                  box-shadow 0.45s ease !important;
+    }
+
+    /* ============================================================
+       2. Global reset
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    *:focus, *:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    html, body { margin: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--body);
+      font-family: var(--sans);
+      overflow-x: clip;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: background-color 0.45s ease, color 0.45s ease;
+    }
+
+    /* ============================================================
+       3. CUSTOM CURSOR — two states, nothing in between
+       ============================================================ */
+    @media (hover: hover) and (pointer: fine) {
+      .anim-ready,
+      .anim-ready * { cursor: none !important; }
+    }
+
+    #custom-cursor {
+      position: fixed;
+      top: 0; left: 0;
+      width: 32px; height: 32px;
+      border: 1px solid var(--cur-border);
+      border-radius: 9999px;
+      background-color: transparent;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      filter: none !important;
+      pointer-events: none;
+      z-index: 99999;
+      opacity: 0;
+      transform: translate3d(-300px, -300px, 0) translate(-50%, -50%);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  background-color 0.3s ease,
+                  border-color 0.3s ease,
+                  transform 0.15s ease-out,
+                  opacity 0.25s ease;
+      will-change: transform, width, height;
+    }
+
+    #custom-cursor.is-hot {
+      width: 64px; height: 64px;
+      border: none !important;
+      background-color: var(--cur-spot);
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      #custom-cursor { display: none !important; }
+    }
+
+    /* ============================================================
+       4. Typography
+       ============================================================ */
+    .font-academic { font-family: var(--serif) !important; }
+
+    .name {
+      /* Must stay identical to index.html — and the markup classes below must
+         mirror these lines, since Tailwind's injected stylesheet outranks this
+         one on equal specificity. */
+      /* Sans, heavy, uppercase. The nav is ALSO sans uppercase, so the two can
+         no longer be told apart by typeface — the hierarchy rests entirely on
+         weight and tracking: wordmark 800 and tight, nav 400 and wide (0.14em).
+         Those two move together; change one and the header flattens.
+         Tailwind's runtime <style> is injected after this one, so the markup
+         classes must mirror these lines or the utility wins. */
+      font-family: var(--sans);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      line-height: 1.1;
+      color: var(--fg);
+      display: inline-block;
+      user-select: none;
+      text-decoration: none;
+      transition: color 0.45s ease;
+    }
+    @media (min-width: 768px) {
+      .name { font-size: 26px; }
+    }
+
+    /* Zero-jitter rule — nav only, and only the element itself. It must NOT
+       name .hero-title: `!important` there would kill its entrance transform. */
+    .name, .nav-item, header nav a { transform: none !important; }
+
+    /* ============================================================
+       5. Header + theme switcher
+       ============================================================ */
+    #site-header {
+      background-color: var(--header);
+      border-bottom: 1px solid var(--line);
+      transition: background-color 0.45s ease,
+                  border-color 0.45s ease,
+                  transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    /* Scrolling down tucks the bar away; scrolling up brings it straight back.
+       The point is the page footer: with the bar pinned, the wordmark at the
+       top and the name at the bottom are on screen together, and the page
+       reads as if it repeated itself. Tucked, the footer closes the page on
+       its own. Driven from JS, which adds and removes .is-tucked. */
+    #site-header.is-tucked { transform: translateY(-100%); }
+
+    @media (prefers-reduced-motion: reduce) {
+      #site-header { transition: background-color 0.45s ease, border-color 0.45s ease; }
+      #site-header.is-tucked { transform: none; }
+    }
+
+    .nav-item {
+      display: inline-flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 2px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;   /* see .name — weight is what separates nav from wordmark */
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .nav-item:hover, .nav-item:focus-visible, .nav-item.is-active { color: var(--nav-hover); }
+
+    /* The site's one piece of colour outside the loader. Two places only — this
+       underline and .cv-jump's hover rule — so the confetti reads as a palette
+       the site owns, not a stray. Add a third and it stops being restraint. */
+    .nav-item::after { content: ""; background-color: var(--accent); }
+
+    .nav-item.is-active::after {
+      --tw-scale-x: 1;
+      transform: scaleX(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nav-item::after { transition: none !important; }
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px; height: 34px;
+      border-radius: 9999px;
+      border: 1px solid var(--hair);
+      background: transparent;
+      color: var(--muted);
+      padding: 0;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    .theme-toggle:hover { color: var(--nav-hover); border-color: var(--fg); }
+    .theme-toggle svg { width: 16px; height: 16px; display: block; }
+
+    .theme-toggle .icon-sun  { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    #mobile-menu-btn {
+      border: 1px solid var(--hair);
+      transition: border-color 0.45s ease;
+    }
+    /* Three lines with a shorter middle one, which is the shape the reference
+       uses. The weight is NOT copied: that icon is drawn about 3px thick
+       because its whole type system is heavy, and at 3px here it would be the
+       densest object in a header built entirely out of 1px rules. 1.5px is
+       the same hairline as the nav underline and the figure borders. */
+    .burger-line {
+      display: block;
+      width: 18px;
+      height: 1.5px;
+      background: var(--fg);
+      border-radius: 1px;
+      transition: background-color 0.45s ease, width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .burger-line--short { width: 11px; }
+    /* The short line reaching out is the only feedback this button can give
+       on a touch screen, where there is no hover. */
+    #mobile-menu-btn:hover .burger-line--short,
+    #mobile-menu-btn:focus-visible .burger-line--short,
+    #mobile-menu-btn:active .burger-line--short { width: 18px; }
+
+    /* ============================================================
+       6. HERO — byte-for-byte the homepage's .hero-title rule.
+          Entrance: title 0s (700ms) · hairline 0.2s (800ms)
+                    intro 0.35s · publication list 0.5s
+          All four hang off ONE class, .is-revealed on #page-body.
+       ============================================================ */
+    .anchor { scroll-margin-top: 6rem; }
+
+    /* Cormorant reads smaller at the same px value and needs more air than
+       a text face — the markup carries 64/78px and -0.01em accordingly. */
+    .hero-title {
+      font-family: var(--display);
+      font-weight: 400;
+      color: var(--fg);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin: 0 0 14px;              /* hairline sits 14px below */
+    }
+
+    /* A real element, not a border — which is what lets it scale
+       independently of the text. transform-origin is LEFT here because this
+       page is left-aligned; the homepage uses RIGHT because its hero column
+       is right-aligned against the 50/50 divider. Same gesture, mirrored. */
+    .hero-line {
+      display: block;
+      width: 140px;
+      height: 1px;
+      background: var(--rule);
+      margin: 0;
+      transform-origin: left;
+      transition: background-color 0.45s ease;
+    }
+
+    /* Resting states, gated on .anim-ready so a blocked script shows a
+       complete page rather than an invisible one. */
+    .anim-ready .hero-title {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  color 0.45s ease;
+    }
+    .anim-ready .hero-line {
+      transform: scaleX(0);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+                  background-color 0.45s ease;
+    }
+    .anim-ready .pub-block {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.6s ease 0.5s, transform 0.6s ease 0.5s;
+    }
+
+    /* Revealed — the #page-body id gives these headroom over anything. */
+    .anim-ready #page-body.is-revealed .hero-title,
+    .anim-ready #page-body.is-revealed .pub-block {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .anim-ready #page-body.is-revealed .hero-line {
+      transform: scaleX(1);
+    }
+
+    /* --- PAGE TRANSITION VEIL ---------------------------------------
+       The mirror of index.html's. Leaving this page closes the veil in the
+       shared --bg, so the next document paints into the same colour and the
+       seam between the two pages is invisible. */
+    #page-body.is-leaving {
+      opacity: 0;
+      transform: translateY(-6px);
+      filter: blur(5px);
+      transition: opacity 0.3s ease,
+                  transform 0.3s ease,
+                  filter 0.3s ease;
+    }
+    #veil {
+      position: fixed;
+      inset: 0;
+      z-index: 9997;
+      background-color: var(--bg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.34s ease, background-color 0.45s ease;
+    }
+    #veil.is-on { opacity: 1; pointer-events: auto; }
+    /* The transition mark is a MINIATURE of the arrival ring, not a different
+       object: same track-plus-arc construction, same -90deg start, shrunk to
+       48px and stripped of the logo and the counter. One gesture at two
+       scales — arrival introduces, movement only acknowledges.
+       The draw must finish inside LEAVE_MS (520ms) or the navigation cuts it
+       off mid-arc, which is why it is 0.4s after a 0.06s delay, not 0.55s. */
+    .veil-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 48px; height: 48px;
+      margin: -24px 0 0 -24px;
+      transform: rotate(-90deg);     /* 12 o'clock start, like the loader */
+      opacity: 0;
+      transition: opacity 0.18s ease 0.04s;
+    }
+    #veil.is-on .veil-ring { opacity: 1; }
+
+    .veil-track {
+      fill: none;
+      stroke: var(--track);
+      stroke-width: 1;
+      transition: stroke 0.45s ease;
+    }
+    /* 2 * pi * 20 = 125.66 — the dash is the full circumference, so animating
+       the offset to 0 draws exactly one revolution. */
+    .veil-bar {
+      fill: none;
+      stroke: var(--rule);
+      stroke-width: 1.5;
+      stroke-linecap: butt;
+      stroke-dasharray: 125.66;
+      stroke-dashoffset: 125.66;
+      transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+                  stroke 0.45s ease;
+    }
+    #veil.is-on .veil-bar { stroke-dashoffset: 0; }
+
+    /* ============================================================
+       7. MASTER'S THESIS MODULE
+       ============================================================ */
+    /* Colour comes from the theme tokens, not from fixed stone-* values: this
+       page has a dark mode, and a hard-coded stone-50 panel with stone-900
+       text would stay light-on-light after the theme is switched. */
+    /* A sub-heading under the page title now, not a repeat of it: medium
+       rather than regular, and a step down in size so the 78px hero above
+       stays the page's only display-size element. */
+    .res-head {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      line-height: 1.25;
+      color: var(--fg);
+      margin: 0;
+      transition: color 0.45s ease;
+    }
+    @media (min-width: 768px) { .res-head { font-size: 26px; } }
+    .res-kicker {
+      display: block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .res-intro {
+      font-size: 15.5px;
+      line-height: 1.8;
+      font-weight: 400;
+      color: var(--body);
+      max-width: 42rem;
+      margin: 0;
+      text-wrap: pretty;
+    }
+
+    /* ---- The card ---- */
+    .thesis-card {
+      background-color: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 28px 24px;
+      transition: background-color 0.45s ease, border-color 0.45s ease;
+    }
+    @media (min-width: 768px) { .thesis-card { padding: 34px; } }
+
+    .res-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg);
+      background-color: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 5px 10px;
+      transition: background-color 0.45s ease, color 0.45s ease, border-color 0.45s ease;
+    }
+
+    .thesis-title {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.35;
+      letter-spacing: -0.005em;
+      color: var(--fg);
+      margin: 16px 0 0;
+      text-wrap: pretty;
+      transition: color 0.45s ease;
+    }
+    @media (min-width: 768px) { .thesis-title { font-size: 22px; } }
+
+    .thesis-meta {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 10px 0 0;
+    }
+
+    /* 400 and 15px: the same body weight index.html and portfolio.html use.
+       An abstract is the thing on this page most likely to be read in full. */
+    .thesis-abstract {
+      font-size: 15px;
+      line-height: 1.8;
+      font-weight: 400;
+      color: var(--body);
+      margin: 18px 0 0;
+      text-wrap: pretty;
+    }
+    .thesis-role {
+      font-size: 13px;
+      line-height: 1.7;
+      font-style: italic;
+      color: var(--muted);
+      margin: 16px 0 0;
+      text-wrap: pretty;
+    }
+
+    .thesis-methods { margin-top: 24px; }
+    .res-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--body);
+      background-color: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 5px 9px;
+      transition: background-color 0.45s ease, border-color 0.45s ease, color 0.45s ease;
+    }
+
+
+    /* ---- Figure ---- */
+    .thesis-fig {
+      margin: 0;
+      background-color: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      transition: background-color 0.45s ease, border-color 0.45s ease;
+    }
+    .thesis-fig img {
+      display: block;
+      width: 100%;
+      height: auto;          /* a plot is data: no crop, no forced ratio */
+      border-radius: 5px;
+      border: 1px solid var(--line);
+    }
+    .thesis-fig figcaption {
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin-top: 11px;
+      text-wrap: pretty;
+    }
+    .thesis-fig figcaption strong { color: var(--fg); font-weight: 600; transition: color 0.45s ease; }
+
+
+    /* ============================================================
+       SITE FOOTER
+       ============================================================ */
+    /* The panel token rather than a fixed stone-50: this band has to separate
+       itself from the page in both themes, and a hard grey would be darker
+       than the page in light mode and lighter than it in dark mode by
+       accident rather than by design. */
+    #site-footer {
+      background-color: var(--panel);
+      border-top: 1px solid var(--line);
+      transition: background-color 0.45s ease, border-color 0.45s ease;
+    }
+    .foot-copy {
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      margin: 0;
+    }
+    /* Inter uppercase, letterspaced: the label treatment already used by the
+       nav, the CV contents and the portfolio metadata. The footer appears on
+       every page, so it has to speak the language all of them share. */
+    .foot-label {
+      display: block;
+      font-family: var(--sans);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+    .foot-value {
+      font-size: 15.5px;
+      line-height: 1.6;
+      font-weight: 400;
+      color: var(--fg);
+      margin: 0;
+      transition: color 0.45s ease;
+    }
+    .foot-value a {
+      color: var(--fg);
+      text-decoration: none;
+      border-bottom: 1px solid var(--hair);
+      padding-bottom: 2px;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    .foot-value a:hover { border-color: var(--accent); color: var(--nav-hover); }
+
+    /* ============================================================
+       8. Fallbacks if the Tailwind CDN is unreachable
+       ============================================================ */
+    @media (max-width: 767px) { .nav-desktop { display: none; } #custom-cursor { display: none; } }
+    @media (min-width: 768px) { #mobile-menu-btn { display: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      .anim-ready .hero-title,
+      .anim-ready .pub-block { opacity: 1 !important; transform: none !important; }
+      .anim-ready .hero-line { transform: scaleX(1) !important; }
+      .anim-ready, .anim-ready * { cursor: auto !important; }
+      #custom-cursor { display: none !important; }
+      #page-body.is-leaving { opacity: 1 !important; filter: none !important; transform: none !important; }
+      #veil { display: none !important; }
+    }
+    /* ============================================================
+       MOBILE OVERLAY MENU
+       ============================================================ */
+    #mobile-menu { position: fixed; inset: 0; z-index: 60; }
+    #mobile-menu[hidden] { display: none; }
+
+    /* Measured off the reference clip, stepped frame by frame at 30fps: the
+       panel's leading edge breaks the bottom of the screen at frame 121 and
+       is flat by frame 126, so the rise there takes about 170ms. It is a
+       wide, shallow dome that flattens as it lands, which is a border-radius
+       animating to 0 at the same time as the translate, not a plain slide.
+       380ms here rather than 170ms, so it sits with the 520ms page veil this
+       site already uses instead of snapping next to it. */
+    .mm-sheet {
+      position: absolute;
+      inset: 0;
+      background-color: var(--bg);
+      transform: translateY(101%);
+      /* 50%+50% across the top is exactly the width, so the browser does not
+         clamp it and the two quarter-ellipses meet dead centre. The vertical
+         radius is in vw, not %, so the dome keeps its proportion on a short
+         screen instead of flattening with the viewport.
+         24vw comes off the clip: the arc's height is 0.22 to 0.26 of the
+         screen width in the three frames where it is still curved. */
+      border-radius: 50% 50% 0 0 / 24vw 24vw 0 0;
+      transition: transform 0.38s cubic-bezier(0.32, 0, 0.18, 1),
+                  border-radius 0.38s cubic-bezier(0.32, 0, 0.18, 1),
+                  background-color 0.45s ease;
+    }
+    #mobile-menu.is-open .mm-sheet { transform: translateY(0); border-radius: 0; }
+
+    /* A sibling of the panel, not a child of it, so the labels can fade in
+       while the panel is still moving underneath them. */
+    .mm-content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    /* An SVG, not a &times; glyph. The glyph's weight comes from whatever font
+       renders it, so it never matched the 1.5px lines of the button that
+       opened the menu. Drawn, the two icons are the same object. */
+    .mm-close {
+      position: absolute;
+      top: 1.5rem; right: 1.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      color: var(--fg);
+      background: none;
+      border: 0;
+      padding: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.2s;
+    }
+    #mobile-menu.is-open .mm-close { opacity: 1; }
+
+    .mm-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    /* Muted, like the desktop nav. Every item used to be at full strength,
+       which left no way to show which page you are on and nowhere for a tap
+       to brighten TO — the reference's tap highlight only reads because its
+       items start grey. This is the desktop nav's own rule, not an import. */
+    .mm-item {
+      position: relative;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.34s ease,
+                  transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+                  color 0.25s ease;
+    }
+    .mm-item.is-current { color: var(--fg); }
+    /* Same accent hairline the desktop nav puts under the current page. The
+       accent still appears in only one KIND of place: under a nav item. */
+    .mm-item.is-current::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -9px;
+      height: 1px;
+      background-color: var(--accent);
+    }
+    /* :active alone is not enough on a touch screen: it is cleared the moment
+       the finger lifts, which is the same moment the navigation starts, so
+       the highlight would never be seen. The class is added on the click that
+       triggers the navigation and simply leaves with the page. */
+    .mm-item:active,
+    .mm-item.is-tapped { color: var(--fg); }
+    #mobile-menu.is-open .mm-item { opacity: 1; transform: none; }
+
+    /* Bottom item first. In the reference the lowest label is legible about
+       ten frames (330ms) before the top one, so the list lights from the
+       bottom upward. Read as a top-down stagger it is a different gesture. */
+    /* Three delays, not one. A bare `transition-delay` applies to EVERY
+       transitioned property, so the entrance stagger was also delaying the
+       colour change: a tapped item took up to 0.45s to even start moving and
+       the highlight was gone with the page before it arrived. The values map
+       to the properties in the order they are declared on .mm-item —
+       opacity, transform, colour — and the colour never waits. */
+    #mobile-menu.is-open .mm-nav .mm-item:nth-child(4) { transition-delay: 0.24s, 0.24s, 0s; }
+    #mobile-menu.is-open .mm-nav .mm-item:nth-child(3) { transition-delay: 0.31s, 0.31s, 0s; }
+    #mobile-menu.is-open .mm-nav .mm-item:nth-child(2) { transition-delay: 0.38s, 0.38s, 0s; }
+    #mobile-menu.is-open .mm-nav .mm-item:nth-child(1) { transition-delay: 0.45s, 0.45s, 0s; }
+    /* The theme switch sits below the list, so a strict bottom-up order would
+       light it first. It is a control rather than a destination, so it comes
+       last instead. */
+    #mobile-menu.is-open .mm-toggle { transition-delay: 0.52s, 0.52s, 0s; }
+
+    /* Closing: the list drops and fades as ONE block, no stagger, and the
+       panel follows it down. In the reference the whole list moves together
+       on the way out, which is what makes the exit read as quick while the
+       entrance reads as deliberate. */
+    #mobile-menu.is-closing .mm-item,
+    #mobile-menu.is-closing .mm-close {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      transition-delay: 0s;
+    }
+    #mobile-menu.is-closing .mm-sheet {
+      transform: translateY(101%);
+      border-radius: 50% 50% 0 0 / 24vw 24vw 0 0;
+      transition-duration: 0.32s;
+      transition-delay: 0.1s;
+    }
+
+    /* The global reduced-motion block below zeroes durations but not delays,
+       and a half-second delay on a zero-length transition is just a stall. */
+    @media (prefers-reduced-motion: reduce) {
+      .mm-sheet, .mm-item, .mm-close { transition-delay: 0s !important; }
+    }
+
+    /* ============================================================
+       BUTTONS — one component, two weights
+       ============================================================ */
+    /* There were three of these before, one per page, and they disagreed on
+       typeface (mono vs Inter), radius (4px vs 2px), tracking (0.12 / 0.14 /
+       0.16em) and size (11 / 11.5 / 12px). A visitor compares a button to the
+       other buttons, not to the chips next to it, so the shared parts live
+       here and the only thing a tier changes is which colours are filled in.
+
+       Which tier a link gets is a claim about importance, so there is exactly
+       one solid button on the whole site: the live WebXR prototype, which is
+       the one thing a reviewer can actually open and use. The two PDFs are
+       documents, so they share the outline weight. */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 26px;
+      border: 1px solid;
+      border-radius: 2px;
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .btn--solid {
+      color: var(--bg);
+      background-color: var(--fg);
+      border-color: var(--fg);
+    }
+    .btn--solid:hover {
+      background-color: transparent;
+      color: var(--fg);
+      border-color: var(--accent);
+    }
+    .btn--line {
+      color: var(--fg);
+      background-color: transparent;
+      border-color: var(--hair);
+    }
+    .btn--line:hover { border-color: var(--accent); color: var(--nav-hover); }
+    .btn .arrow { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .btn:hover .arrow { transform: translate(3px, -3px); }
+
+    @media (max-width: 480px) {
+      .btn { padding: 13px 20px; font-size: 11px; letter-spacing: 0.13em; }
+    }
+    /* "Launch Live WebXR Prototype" is 27 characters of letterspaced caps and
+       it has to stay on one line. At 320px it ran 15px past its column, so
+       this step buys the width back from the padding and the tracking rather
+       than letting the longest label wrap under its own arrow. */
+    @media (max-width: 360px) {
+      .btn { padding: 12px 14px; letter-spacing: 0.1em; gap: 9px; }
+    }
+
+  </style>
+</head>
+<body class="antialiased">
+
+<!-- ============ HEADER ============ -->
+<header id="site-header" class="sticky top-0 z-50 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-8 md:px-12 h-20 flex items-center justify-between">
+
+    <!-- On a sub-page the wordmark becomes the way home, so here it IS a link. -->
+    <a href="index.html" class="name font-sans font-extrabold text-[22px] md:text-[26px] tracking-[-0.005em] uppercase select-none">Li Yng Kooi</a>
+
+    <div class="flex items-center gap-6">
+      <nav class="nav-desktop hidden md:flex items-center space-x-8">
+        <a href="index.html#about" data-nav
+           class="nav-item relative after:absolute after:bottom-[6px] after:left-0 after:w-full after:h-[1px] after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300">About</a>
+
+        <a href="research.html" data-nav
+           class="nav-item is-active relative after:absolute after:bottom-[6px] after:left-0 after:w-full after:h-[1px] after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300">Research</a>
+
+        <a href="portfolio.html" data-nav
+           class="nav-item relative after:absolute after:bottom-[6px] after:left-0 after:w-full after:h-[1px] after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300">Portfolio</a>
+
+        <a href="index.html#cv" data-nav
+           class="nav-item relative after:absolute after:bottom-[6px] after:left-0 after:w-full after:h-[1px] after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300">CV</a>
+      </nav>
+
+      <button class="theme-toggle js-theme" type="button" aria-label="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8Z"/>
+        </svg>
+      </button>
+
+      <button id="mobile-menu-btn"
+              class="md:hidden w-10 h-10 rounded-full flex flex-col items-center justify-center gap-[5px]"
+              aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="burger-line"></span>
+        <span class="burger-line burger-line--short"></span>
+        <span class="burger-line"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MOBILE OVERLAY MENU ============ -->
+<div id="mobile-menu" class="fixed inset-0 z-[60]"
+     role="dialog" aria-modal="true" aria-label="Menu" hidden>
+
+  <div class="mm-sheet" aria-hidden="true"></div>
+
+  <div class="mm-content">
+    <button id="mobile-close-btn" class="mm-close" type="button" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </svg>
+    </button>
+
+    <nav class="mm-nav">
+      <a href="index.html#about" class="mm-item font-academic text-3xl no-underline mobile-nav-link">About</a>
+      <a aria-current="page" href="research.html" class="mm-item font-academic text-3xl no-underline mobile-nav-link is-current">Research</a>
+      <a href="portfolio.html" class="mm-item font-academic text-3xl no-underline mobile-nav-link">Portfolio</a>
+      <a href="index.html#cv" class="mm-item font-academic text-3xl no-underline mobile-nav-link">CV</a>
+    </nav>
+
+    <button class="theme-toggle js-theme mm-item mm-toggle" type="button" aria-label="Switch theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2"/>
+        <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8Z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ============ PAGE BODY ============ -->
+<div id="page-body">
+  <main class="max-w-7xl mx-auto px-8 md:px-16">
+
+    <!-- ============ PAGE HERO ============
+         The tall band is what makes this read like the homepage hero: the
+         type was already identical, but "About" sits centred in a 92vh
+         section, so the same glyphs in a cramped frame looked smaller. -->
+    <section class="pt-28 md:pt-40 pb-20 md:pb-28">
+      <h1 class="hero-title font-display font-normal text-[64px] md:text-[78px] tracking-[-0.01em]">Research</h1>
+      <div class="hero-line" aria-hidden="true"></div>
+
+    </section>
+
+    <!-- ============ RESEARCH ============ -->
+    <section id="publications" class="anchor pub-block pb-24 md:pb-28">
+
+      <!-- Section header on the site's 4:8 grid, so the intro no longer sits
+           alone against an empty right half. -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:items-baseline mb-12">
+        <div class="md:col-span-4">
+          <h2 class="res-head">Master's Thesis</h2>
+          <span class="res-kicker">Management Science &amp; Engineering</span>
+        </div>
+        <div class="md:col-span-8">
+          <p class="res-intro">
+            My research investigates behavioral dynamics and information systems in digital
+            retail environments. I combine natural language processing and time-series
+            econometrics to examine how linguistic strategies and platform interfaces shape
+            consumer decisions over time.
+          </p>
+        </div>
+      </div>
+
+      <div class="thesis-card grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+
+        <div class="md:col-span-7">
+          <span class="res-tag">Zhejiang University (2026) &middot; Quantitative Econometrics</span>
+
+          <h3 class="thesis-title">
+            From Narrative to Conversion: The Dynamic Impact of Streamer Storytelling on
+            Livestream Sales Performance (An Empirical Study of Taobao Women's Apparel)
+          </h3>
+
+          <p class="thesis-meta">Advised by Prof. Xi Chen &middot; School of Management</p>
+
+          <p class="thesis-abstract">
+            This empirical study examines how host storytelling influences purchasing behavior
+            in livestream commerce. Using 5,000 minute-level observations from Taobao Live, I
+            quantified narrative intensity across scenario building, sensory description, and
+            problem-solution structures. The econometric models reveal that storytelling does
+            not trigger immediate impulse buying. Instead, it absorbs cognitive bandwidth,
+            stabilizes chat room sentiment volatility, and drives concentrated conversion
+            bursts several minutes later.
+          </p>
+
+          <p class="thesis-role">
+            I was the lead researcher responsible for the theoretical framework, minute-level
+            transcript coding, econometric modeling, and data analysis.
+          </p>
+
+          <div class="thesis-methods">
+            <span class="res-label">Methods &amp; Dataset</span>
+            <div class="chip-row">
+              <span class="chip">5,000 Minute-Level Observations</span>
+              <span class="chip">SnowNLP Sentiment Modeling</span>
+              <span class="chip">Vector Autoregression (VAR)</span>
+              <span class="chip">Dynamic Time Warping (DTW)</span>
+            </div>
+          </div>
+
+          <div class="mt-7">
+            <!-- This said "Download Thesis" but carries no `download`
+                 attribute, so it has always opened the PDF in a tab instead.
+                 The verb now matches what the click does. -->
+            <a href="zju_master_thesis.pdf" target="_blank" rel="noopener noreferrer"
+               class="btn btn--line action-link">
+              View Thesis (PDF)
+              <span class="arrow" aria-hidden="true">&#8599;</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="md:col-span-5 space-y-4">
+          <figure class="thesis-fig">
+            <img src="research-temporal-dynamics.jpg" alt="Minute-level tracking of narrative intensity against conversion rate." loading="lazy">
+            <figcaption>
+              <strong>Figure 1: High-Frequency Dynamics.</strong> Minute-level tracking
+              demonstrates that sales conversion drops during narrative immersion and spikes
+              post-story.
+            </figcaption>
+          </figure>
+
+          <figure class="thesis-fig">
+            <img src="research-dtw-path.jpg" alt="Dynamic Time Warping path between narrative intensity and sales conversion." loading="lazy">
+            <figcaption>
+              <strong>Figure 2: Dynamic Time Warping (DTW).</strong> The optimal warping path
+              deviates from the diagonal, mathematically confirming that sales bursts lag
+              behind narrative input.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<!-- ============ FOOTER / CONTACT ============ -->
+<footer id="site-footer" class="py-12 md:py-14">
+  <div class="max-w-7xl mx-auto px-8 md:px-16">
+
+    <!-- Three anchors spread across the SAME container every section above
+         uses. The reference this follows hugs the viewport edge instead,
+         which would make the footer the only block on the site that does not
+         line up with the content above it.
+         The location sits in the middle slot, where that reference puts its
+         social links. Stacked under the email instead, the left column goes
+         two rows tall while the right stays one line, and two thirds of the
+         band empties out again. -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+      <div>
+        <span class="foot-label">Email</span>
+        <p class="foot-value">
+          <a href="mailto:k_liyng@yahoo.com" class="action-link">k_liyng@yahoo.com</a>
+        </p>
+      </div>
+
+      <div>
+        <span class="foot-label">Current Location</span>
+        <p class="foot-value">Kaohsiung, Taiwan</p>
+      </div>
+
+      <!-- items-end, not items-start. The reference puts its copyright level
+           with the labels; with shorter rows than it has, this sits on the
+           value line so it is not hanging off a 10.5px label. -->
+      <p class="foot-copy">&copy; 2026 Li Yng Kooi. All rights reserved.</p>
+    </div>
+
+  </div>
+</footer>
+
+</div><!-- /#page-body -->
+
+<!-- ============ PAGE TRANSITION VEIL ============ -->
+<div id="veil" aria-hidden="true">
+  <svg class="veil-ring" viewBox="0 0 48 48">
+    <circle class="veil-track" cx="24" cy="24" r="20"/>
+    <circle class="veil-bar"   cx="24" cy="24" r="20"/>
+  </svg>
+</div>
+
+<!-- ============ CUSTOM CURSOR ============ -->
+<div id="custom-cursor" class="hidden md:block" aria-hidden="true"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  const root = document.documentElement;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- 1. Theme switcher — same key as index.html ---------- */
+  const STORE_KEY = "site-theme";
+  let themeTimer = null;
+
+  function labelToggles(theme) {
+    const next = theme === "dark" ? "ivory" : "dark";
+    document.querySelectorAll(".js-theme").forEach(btn => {
+      btn.setAttribute("aria-label", "Switch to " + next + " theme");
+      btn.removeAttribute("title");
+    });
+  }
+
+  function setTheme(theme, animate) {
+    if (animate && !reduced) {
+      root.classList.add("theming");
+      clearTimeout(themeTimer);
+      themeTimer = setTimeout(() => root.classList.remove("theming"), 520);
+    }
+    root.setAttribute("data-theme", theme);
+    labelToggles(theme);
+    try { localStorage.setItem(STORE_KEY, theme); } catch (e) { /* private mode */ }
+  }
+
+  labelToggles(root.getAttribute("data-theme") || "light");
+
+  document.querySelectorAll(".js-theme").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      setTheme(next, true);
+      btn.blur();
+    });
+  });
+
+  document.querySelectorAll("[title]").forEach(el => el.removeAttribute("title"));
+
+  /* ---------- 2. Custom cursor ---------- */
+  const cursor = document.getElementById("custom-cursor");
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  if (cursor && finePointer && !reduced) {
+    let x = -300, y = -300, awake = false, queued = false;
+
+    function paint() {
+      queued = false;
+      cursor.style.transform =
+        "translate3d(" + x + "px," + y + "px,0) translate(-50%,-50%)";
+    }
+    function schedule() {
+      if (!queued) { queued = true; requestAnimationFrame(paint); }
+    }
+
+    window.addEventListener("mousemove", (e) => {
+      x = e.clientX; y = e.clientY;
+      if (!awake) { awake = true; cursor.style.opacity = "1"; }
+      schedule();
+    }, { passive: true });
+
+    function sleep() {
+      awake = false;
+      cursor.classList.remove("is-hot");
+      cursor.style.opacity = "0";
+    }
+    window.addEventListener("mouseleave", sleep);
+    window.addEventListener("blur", sleep);
+    window.addEventListener("touchstart", sleep, { passive: true });
+
+    document.querySelectorAll("nav a, button, .action-link, .name").forEach(el => {
+      el.addEventListener("mouseenter", () => cursor.classList.add("is-hot"));
+      el.addEventListener("mouseleave", () => cursor.classList.remove("is-hot"));
+    });
+  }
+
+  /* ---------- 3. Entrance choreography ----------
+     One class drives all four steps. The double requestAnimationFrame
+     guarantees the browser has painted the resting state first — with a
+     single frame the transition is sometimes skipped and the title simply
+     appears. A 1.2s failsafe covers any case where rAF never runs. */
+  const pageBody = document.getElementById("page-body");
+
+  function reveal() { pageBody.classList.add("is-revealed"); }
+
+  requestAnimationFrame(() => requestAnimationFrame(reveal));
+  setTimeout(reveal, 1200);
+
+  /* ---------- 4. Leaving this page, veiled ----------
+     Mirrors index.html: the content blurs away, the veil closes in the shared
+     background colour, and only then does the browser navigate — so the two
+     documents join without a white flash. */
+  const veil     = document.getElementById("veil");
+  const LEAVE_MS = 520;
+  let navigating = false;
+
+  document.querySelectorAll("[data-nav], .mobile-nav-link").forEach(link => {
+    link.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+
+      let url;
+      try { url = new URL(link.href, location.href); } catch (err) { return; }
+      if (url.origin !== location.origin) return;
+      if (url.pathname === location.pathname && !url.hash) return;  // already here
+      if (reduced || navigating) return;
+
+      e.preventDefault();
+      navigating = true;
+      pageBody.classList.add("is-leaving");
+      veil && veil.classList.add("is-on");
+      setTimeout(() => { location.href = url.href; }, LEAVE_MS);
+      link.blur();
+    });
+  });
+
+  /* Back button can restore this page from the bfcache mid-transition. */
+  window.addEventListener("pageshow", () => {
+    navigating = false;
+    veil && veil.classList.remove("is-on");
+    pageBody.classList.remove("is-leaving");
+  });
+
+  /* ---------- 5. Mobile menu ---------- */
+  const menuBtn    = document.getElementById("mobile-menu-btn");
+  const closeBtn   = document.getElementById("mobile-close-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+
+  let menuTimer = 0;
+
+  function toggleMenu(open) {
+    if (open) {
+      clearTimeout(menuTimer);
+      mobileMenu.classList.remove("is-closing");
+      mobileMenu.hidden = false;
+      /* Two frames, not one. The first commits the un-hidden element with the
+         panel still below the fold; the second starts the transition. Done in
+         a single frame the browser is free to collapse both into one style
+         pass, and the panel is simply there with no rise at all. */
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        mobileMenu.classList.add("is-open");
+      }));
+      document.body.style.overflow = "hidden";
+      menuBtn.setAttribute("aria-expanded", "true");
+    } else {
+      mobileMenu.classList.remove("is-open");
+      mobileMenu.classList.add("is-closing");
+      clearTimeout(menuTimer);
+      /* 460ms covers the 180ms label drop plus the panel's 100ms delay and
+         320ms fall. Hiding earlier cuts the panel off mid-descent. */
+      menuTimer = setTimeout(() => {
+        mobileMenu.hidden = true;
+        mobileMenu.classList.remove("is-closing");
+      }, 460);
+      document.body.style.overflow = "";
+      menuBtn.setAttribute("aria-expanded", "false");
+      menuBtn.blur();
+    }
+  }
+
+  menuBtn?.addEventListener("click", () => toggleMenu(true));
+  closeBtn?.addEventListener("click", () => toggleMenu(false));
+  document.querySelectorAll(".mobile-nav-link").forEach(l => l.addEventListener("click", () => {
+    /* Mark the tapped item before the menu starts closing, so the colour
+       change is on screen during the panel's fall and the page transition
+       rather than after them. */
+    l.classList.add("is-tapped");
+    toggleMenu(false);
+  }));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !mobileMenu.hidden) toggleMenu(false);
+  });
+  matchMedia("(min-width: 768px)").addEventListener("change", (e) => {
+    if (e.matches && !mobileMenu.hidden) toggleMenu(false);
+  });
+
+  /* NOTE: index.html's click-driven `.is-active` handler is deliberately NOT
+     here. On a multi-page site the active link is decided by which page you
+     are on, so it is set in the markup and must not move on click. */
+})();
+</script>
+<!-- ============ HEADER TUCK ON SCROLL ============ -->
+<script>
+(function () {
+  var header = document.getElementById("site-header");
+  if (!header) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  var FLOOR    = 160;  /* never tuck this close to the top of the page   */
+  var DOWN_MIN = 6;    /* px of downward travel before it hides          */
+  var UP_MIN   = 10;   /* px of upward travel before it comes back       */
+
+  var lastY   = window.scrollY;
+  var ticking = false;
+  var holdUntil = 0;   /* in-page jumps keep the bar on screen           */
+
+  function update() {
+    ticking = false;
+    var y = window.scrollY;
+    var delta = y - lastY;
+
+    if (Date.now() < holdUntil) { lastY = y; return; }
+
+    if (y < FLOOR) {
+      header.classList.remove("is-tucked");
+      lastY = y;
+      return;
+    }
+    /* Below the threshold the move is trackpad noise, so lastY is NOT
+       updated: small movements accumulate until one of them counts. */
+    if (delta > DOWN_MIN) {
+      header.classList.add("is-tucked");
+      lastY = y;
+    } else if (delta < -UP_MIN) {
+      header.classList.remove("is-tucked");
+      lastY = y;
+    }
+  }
+
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+
+  /* A click on a same-page anchor (the CV contents list) scrolls down on
+     purpose, and hiding the bar mid-jump looks like a glitch. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    holdUntil = Date.now() + 900;
+    header.classList.remove("is-tucked");
+  }, true);
+})();
+</script>
+</body>
+</html>
