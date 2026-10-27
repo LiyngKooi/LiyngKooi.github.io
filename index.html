@@ -137,6 +137,39 @@
 
       color-scheme: dark;
     }
+    /* Fallback for when the blocking <head> script does not run: a content
+       blocker, an in-app browser with scripting restricted, or a parse error
+       in anything above it. Everything dark about this site hangs off that one
+       line setting data-theme, and with no attribute set the light tokens win
+       even on a dark phone — which is exactly the state where the mark's
+       --logo-filter stays `none` and a black logo lands on a dark background.
+       :not([data-theme="light"]) so an explicit light choice still wins. */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+
+        --bg:     #121212;
+        --panel:  #202020;
+        --fg:     #FAFAF8;
+        --body:   #C2BDB7;
+        --muted:  #A8A29E;
+        --line:   #262626;
+        --hair:   #3A3A3A;
+        --rule:   rgba(255, 255, 255, 0.8);
+        --accent: #FA7AA9;   /* the confetti pink as-is; it needs no help on black */
+        --track:  rgba(250, 250, 248, 0.14);
+        --header: rgba(18, 18, 18, 0.82);
+        --logo-filter: invert(1) brightness(1.08);
+        --photo-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.7);
+        --ring-edge: rgba(255, 255, 255, 0.14);
+
+        --nav-hover:  #FFFFFF;
+        --cur-border: rgba(255, 255, 255, 0.35);
+        --cur-spot:   rgba(255, 255, 255, 0.2);
+
+        color-scheme: dark;
+      }
+    }
+
 
     :root.theming * {
       transition: background-color 0.45s ease,
@@ -603,7 +636,10 @@
     #loader-art img { position: absolute; display: block; }
     /* The black mark follows the page theme; the confetti never does — it is
        the one coloured thing on the whole site, which is the open question. */
-    .art-mark { filter: var(--logo-filter); }
+    .art-mark {
+      -webkit-filter: var(--logo-filter);
+              filter: var(--logo-filter);
+    }
     @keyframes confettiTwinkle {
       0%, 100% { opacity: 1;    transform: scale(1); }
       50%      { opacity: 0.22; transform: scale(0.88); }
@@ -626,28 +662,14 @@
       margin-bottom: 22px;
       transition: color 0.45s ease;
     }
+    /* This @media used to open and then swallow a verbatim second copy of the
+       whole loader block above — #loader-art, .art-mark, the keyframes, all of
+       it — nested one level deeper. It parsed, and the live rules were the
+       top-level originals, so nothing was broken; but a duplicate CSS rule has
+       already cost this project a debugging round once, and a second .art-mark
+       is the first thing anyone would suspect when the mark misbehaves. */
     @media (min-width: 768px) {
-  
-    /* ---- Loader centre: colour mark, confetti twinkling ---- */
-    #loader-art {
-      position: relative;
-      width: 200px; height: 200px;
-      margin-bottom: 20px;
-    }
-    @media (min-width: 768px) { #loader-art { width: 260px; height: 260px; margin-bottom: 26px; } }
-    #loader-art img { position: absolute; display: block; }
-    /* The black mark follows the page theme; the confetti never does — it is
-       the one coloured thing on the whole site, which is the open question. */
-    .art-mark { filter: var(--logo-filter); }
-    @keyframes confettiTwinkle {
-      0%, 100% { opacity: 1;    transform: scale(1); }
-      50%      { opacity: 0.22; transform: scale(0.88); }
-    }
-    /* 1.7s cycle = well under the 3-flashes-per-second accessibility ceiling. */
-    .art-bit { animation: confettiTwinkle 1.7s ease-in-out infinite; transform-origin: 50% 50%; }
-    @media (prefers-reduced-motion: reduce) { .art-bit { animation: none; } }
-
-    #loader-name { font-size: 68px; margin-bottom: 18px; }
+      #loader-name { font-size: 68px; margin-bottom: 18px; }
     }
 
     #loader-counter {
