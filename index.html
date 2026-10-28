@@ -3,6 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- The page handles both appearances itself. Without this declaration an
+       in-app WebView is free to run its own automatic dark pass over the
+       document: that pass repaints backgrounds and text but deliberately
+       leaves <img> content alone, which is the one combination that hides
+       this loader — the mark keeps the black it was drawn with while the
+       sheet behind it is turned dark underneath it. Declaring support is the
+       documented way to tell the engine to stop and let the CSS decide. It
+       belongs in the markup, not only in CSS, because it is read before any
+       stylesheet is applied. -->
+  <meta name="color-scheme" content="light dark">
+
+  <!-- Matches the browser chrome to whichever sheet is actually showing, so
+       an in-app browser's toolbar stops sitting at the wrong brightness
+       against the page. -->
+  <meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+
   <title>Li Yng Kooi</title>
 
   <!-- Tab icon. The SVG is listed first and wins wherever it's supported — it
@@ -639,6 +657,27 @@
     .art-mark {
       -webkit-filter: var(--logo-filter);
               filter: var(--logo-filter);
+    }
+
+    /* Belt and braces for the loader mark specifically.
+       `brightness(0) invert(1)` instead of the token's `invert(1)`: measured,
+       the source PNG is pure black at every percentile from the 1st to the
+       99th, so the two produce an identical white mark here — but this form
+       does not depend on that staying true, and it survives a repaint that
+       has already touched the image's colours. Written as its own rule with
+       !important rather than by changing the token, because the token is
+       shared with the header logo and that one must keep its mid-tones.
+       Both branches are covered: the attribute the script sets, and the
+       media query that stands in when the script never runs. */
+    :root[data-theme="dark"] .art-mark {
+      -webkit-filter: brightness(0) invert(1) !important;
+              filter: brightness(0) invert(1) !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .art-mark {
+        -webkit-filter: brightness(0) invert(1) !important;
+                filter: brightness(0) invert(1) !important;
+      }
     }
     @keyframes confettiTwinkle {
       0%, 100% { opacity: 1;    transform: scale(1); }
