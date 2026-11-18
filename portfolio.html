@@ -703,6 +703,17 @@
       object-position: center;
     }
 
+    /* Section 06's pair is the same problem as the testing row: a press
+       photograph at 3:2 beside a classroom photograph at 7:6 puts one card a
+       third taller than the other, and the two captions stop sharing a
+       baseline. 4:3 sits between the two source ratios, so neither frame
+       loses more than a sliver, and both are landscape to begin with. */
+    .media-row img {
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      object-position: center;
+    }
+
     .fig figcaption {
       font-size: 13px;
       line-height: 1.7;
@@ -764,6 +775,28 @@
       margin: 6px 0 0;
       text-wrap: pretty;
     }
+
+    /* ---- Outbound citations ----
+       The footer's hairline-underlined link, borrowed upward: the same
+       1px rule that goes accent on hover, so an external reference behaves
+       here exactly as the email address does at the bottom of every page.
+       Stacked rather than inline, because two publication names on one line
+       read as a sentence rather than as two separate sources. */
+    .link-list { margin: 14px 0 0; padding: 0; list-style: none; }
+    .link-list li + li { margin-top: 10px; }
+    .link-list a {
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      font-weight: 400;
+      color: var(--fg);
+      text-decoration: none;
+      border-bottom: 1px solid var(--hair);
+      padding-bottom: 2px;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    .link-list a:hover,
+    .link-list a:focus-visible { border-color: var(--accent); color: var(--nav-hover); }
 
 
     /* ---- Section hero ----
@@ -1579,6 +1612,54 @@
               <p class="credit-name">Taiwan Experience Education Program (TEEP)</p>
               <p class="credit-task">Ministry of Education, hosted by National Kaohsiung Normal University (NKNU) &middot; 2026</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- 06 ---- -->
+    <section class="case-sect reveal max-w-6xl mx-auto px-6 md:px-12 py-20 md:py-24 pb-20 md:pb-24">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12">
+
+        <div class="md:col-span-4">
+          <span class="sect-num">06</span>
+          <h2 class="sect-title">Media Coverage &amp; Academic Recognition</h2>
+        </div>
+
+        <div class="md:col-span-8">
+          <p class="prose">
+            Our bilingual WebXR cultural heritage project was featured in Liberty Times
+            (&#33258;&#30001;&#26178;&#22577;), one of Taiwan&rsquo;s major national newspapers, highlighting our
+            team&rsquo;s work in integrating local Taiwanese cultural traditions into interactive
+            language learning. During our showcase at National Kaohsiung Normal University
+            (NKNU), the prototype was also tested and praised for its design creativity,
+            cultural depth, and usability by international educational technology scholars,
+            including Prof. Niels Pinkwart from Humboldt University of Berlin.
+          </p>
+
+          <div class="photo-grid media-row grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12">
+            <figure class="fig">
+              <img src="media-liberty-times.jpg" alt="The project team photographed with the Wangye Boats WebXR interface displayed behind them." loading="lazy">
+              <figcaption><span class="cap-label">National press &middot; Liberty Times</span>Project team featured in Liberty Times alongside the Wangye Boats WebXR interface (Li Yng Kooi, Project Lead &amp; LX Designer).</figcaption>
+            </figure>
+            <figure class="fig">
+              <img src="media-workshop.jpg" alt="International students gathered around laptops during the bilingual AR/VR training workshop." loading="lazy">
+              <figcaption><span class="cap-label">Field workshop &middot; NKNU</span>Bilingual AR/VR training and usability showcase with international students and visiting scholars.</figcaption>
+            </figure>
+          </div>
+
+          <div class="mt-12">
+            <span class="cap-label">Original coverage</span>
+            <ul class="link-list">
+              <li>
+                <a href="https://news.ltn.com.tw/news/life/breakingnews/5613261"
+                   target="_blank" rel="noopener noreferrer">Liberty Times (&#33258;&#30001;&#26178;&#22577;) &#8599;</a>
+              </li>
+              <li>
+                <a href="https://share.google/UvxIbyvV5CQNh1ShB"
+                   target="_blank" rel="noopener noreferrer">Southern Loudest Voice (&#21335;&#37096;&#26368;&#22823;&#32882;) &#8599;</a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
